@@ -2,8 +2,8 @@
 # Study and models vote choice and feeling thermometer values.
 
 rm(list=ls())
-setwd("C:/Users/Steve/Desktop/Git_Clones/MIML/ANES")
-#setwd("C:/Users/sum410/Desktop/Git_Clones/MIML/ANES")
+setwd("C:/Users/Steve/Documents/Github/MIML/ANES")
+#setwd("C:/Users/sum410/Documents/Github/MIML/ANES")
 
 library(data.table)
 library(car)
