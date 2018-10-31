@@ -6,7 +6,7 @@ setwd("C:/Users/Steve/Documents/GitHub/MIML/ANES")
 library(mice)
 library(MASS)
 
-seed = 24519
+seed <- 24519
 
 ### ANES Data -> Add missingness MCAR
 
