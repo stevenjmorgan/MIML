@@ -14,6 +14,7 @@ October 18
     SVR (Shipi)
     missForest(Lulu)
     k-means ?
+    SVM (Claire)
 
 6) Write literature side by side on each of the above topics  
     
