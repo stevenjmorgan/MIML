@@ -9,7 +9,8 @@ October 18
 4) Upload subset of data with missing values (Steve)
 5) Explore Missing Imputation with traditional techniques and machine learning:
 
-    MICE/ANN (So Young)
+    MICE (Xiaoran)
+    ANN (So Young)
     Amelia (Steve)
     SVR (Shipi)
     missForest(Lulu)
