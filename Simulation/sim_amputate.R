@@ -1,8 +1,8 @@
 # This script adds missingness to the cleaned ANES data.
 
 rm(list=ls())
-#setwd("C:/Users/Steve/Documents/GitHub/MIML/ANES")
-setwd("C:/Users/sum410/Documents/GitHub/MIML/ANES")
+setwd("C:/Users/Steve/Documents/GitHub/MIML/ANES")
+#setwd("C:/Users/sum410/Documents/GitHub/MIML/ANES")
 
 library(mice)
 library(MASS)
@@ -34,12 +34,10 @@ md.pattern(anes.mcar$amp)
 mypatterns <- anes.mcar$patterns
 mypatterns
 
-# Visualize missingness of both "natural" and removed data
-full.na.mcar <- anes.mcar$amp
-full.na.mcar[full.na.mcar == -999] <- NA
-md.pattern(full.na.mcar) # This looks wonky b/c there is no clear "pattern"
+# Visualize missingness of data
+anes.mcar$amp
 
-# Compare proportion of missing data
+# Validate proportion of missing data
 anes.mcar$prop
 
 # Determine number of incomplete observations across natural versus added df's
