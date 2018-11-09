@@ -40,9 +40,8 @@ anes.mcar$amp
 # Validate proportion of missing data
 anes.mcar$prop
 
-# Determine number of incomplete observations across natural versus added df's
+# Determine number of incomplete observations
 sum(!complete.cases(anes.mcar$amp)) #600
-sum(!complete.cases(full.na.mcar)) #600
 
 amp.mcar <- anes.mcar$amp
 
@@ -57,16 +56,13 @@ mypatterns <- anes.mar$patterns
 mypatterns
 
 # Visualize missingness of both "natural" and removed data
-full.na.mar <- anes.mar$amp
-full.na.mar[full.na.mar == -999] <- NA
-md.pattern(full.na.mar) # This looks wonky b/c there is no clear "pattern"
+anes.mar$amp
 
 # Compare proportion of missing data
 anes.mar$prop
 
 # Determine number of incomplete observations across natural versus added df's
-sum(!complete.cases(anes.mar$amp)) #1161
-sum(!complete.cases(full.na.mar)) #2612
+sum(!complete.cases(anes.mar$amp)) #620
 
 amp.mar <- anes.mar$amp
 
@@ -82,18 +78,15 @@ mypatterns <- anes.mnar$patterns
 mypatterns
 
 # Visualize missingness of both "natural" and removed data
-full.na.mnar <- anes.mnar$amp
-full.na.mnar[full.na.mnar == -999] <- NA
-md.pattern(full.na.mnar) # This looks wonky b/c there is no clear "pattern"
+anes.mnar$amp
 
 # Compare proportion of missing data
 anes.mnar$prop
 
 # Determine number of incomplete observations across natural versus added df's
-sum(!complete.cases(anes.mnar$amp)) #1147
-sum(!complete.cases(full.na.mnar)) #2511
+sum(!complete.cases(anes.mnar$amp)) #562
 
 amp.mnar <- anes.mnar$amp
 
 # Save six df's
-save(full.na.mcar, amp.mcar, full.na.mar, amp.mar, amp.mnar, full.na.mnar, file = 'anesMissing.RData')
+save(amp.mcar, amp.mar, amp.mnar, file = 'anesMissing.RData')
