@@ -5,7 +5,7 @@
 ###
 ### Implementation of the Protocol through SVM
 ### Created: 10/10/18
-### Last Updated: 11/7/18
+### Last Updated: 11/9/18
 ###
 
 # In this code, I will implement the protocol for the SODA 502 project for 
@@ -15,6 +15,7 @@
 rm(list = ls())
 
 library(Amelia)
+library(caret)
 
 ###
 ### Direct Imputation
@@ -30,9 +31,14 @@ load("C:/Users/ckell/Desktop/Google Drive/01_Penn State/2018-2019/Fall 2018/soda
 # Exploratory analysis:
 par(mfrow=c(2,2))
 missmap(anes, main = "Missing values vs observed, Full Data")
-missmap(full.na.mar, main = "Missing values vs observed, MAR")
-missmap(full.na.mcar, main = "Missing values vs observed, MCAR")
-missmap(full.na.mnar, main = "Missing values vs observed, MNAR")
+missmap(amp.mar, main = "Missing values vs observed, MAR")
+missmap(amp.mcar, main = "Missing values vs observed, MCAR")
+missmap(amp.mnar, main = "Missing values vs observed, MNAR")
+
+# Listwise deletion for ``natural" missingness in anes
+dim(anes)
+anes <- anes[complete.cases(anes),]
+dim(anes) #deletes 1889 rows
 
 
 # Then I impute values via train/test split or cross validation (preferably CV) 
@@ -40,7 +46,16 @@ missmap(full.na.mnar, main = "Missing values vs observed, MNAR")
 # The imputation procedure results in more than one dataset (i.e.  if using 10-fold CV, 
 # return the 10 datasets, each missing a "fold")
 
-# PUT SVM CODE HERE
+# First, I need to set up cross-validation, I will use the caret package method
+flds <- createFolds(amp.mar$vote.dem, k = 10, list = TRUE, returnTrain = FALSE)
+#names(flds)[1] <- "train"
+
+#how to access the folds:
+fold1 <- amp.mar[flds[[1]],]
+
+#SVM
+
+
 
 # I compare the imputed datasets against the original dataset (with no added missingness) 
 # to determine how well the algorithm recovers missing values. (This line might not be necessary)
@@ -57,16 +72,16 @@ missmap(full.na.mnar, main = "Missing values vs observed, MNAR")
 # Logit:
 logit_form <- as.formula(.~.)
 logit_full <- glm(logit_form, data = anes, family=binomial(link='logit'))
-logit_mar <- glm(logit_form, data = full.na.mar, family=binomial(link='logit'))
-logit_mnar <- glm(logit_form, data = full.na.mnar, family=binomial(link='logit'))
-logit_mcar <- glm(logit_form, data = full.na.mcar, family=binomial(link='logit'))
+logit_mar <- glm(logit_form, data = amp.mar, family=binomial(link='logit'))
+logit_mnar <- glm(logit_form, data = amp.mnar, family=binomial(link='logit'))
+logit_mcar <- glm(logit_form, data = amp.mcar, family=binomial(link='logit'))
 
 # OLS:
 ols_form <- as.formula(.~.)
 ols_full <- lm(ols_form, data = anes)
-ols_mar <- lm(ols_form, data = full.na.mar)
-ols_mnar <- lm(ols_form, data = full.na.mnar)
-ols_mcar <- lm(ols_form, data = full.na.mcar)
+ols_mar <- lm(ols_form, data = amp.mar)
+ols_mnar <- lm(ols_form, data = amp.mnar)
+ols_mcar <- lm(ols_form, data = amp.mcar)
 
 #First, I report the results: 
 ###
@@ -116,9 +131,9 @@ colnames(ols_mod_f) <- c("full", "mar", "mnar", "mcar")
 
 # I report the MAPE and MSE for the data. 
 act <- anes$vote.dem
-pred_mar <- full.na.mar$vote.dem
-pred_mnar <- full.na.mnar$vote.dem
-pred_mcar <- full.na.mcar$vote.dem
+pred_mar <- amp.mar$vote.dem
+pred_mnar <- amp.mnar$vote.dem
+pred_mcar <- amp.mcar$vote.dem
 
 #mse
 mse_mar <- mean((act-pred_mar)^2)
