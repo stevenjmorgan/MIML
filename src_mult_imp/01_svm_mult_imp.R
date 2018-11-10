@@ -32,11 +32,11 @@ load("C:/Users/ckell/Desktop/Google Drive/01_Penn State/2018-2019/Fall 2018/soda
 source("C:/Users/ckell/Desktop/Google Drive/01_Penn State/2018-2019/Fall 2018/soda_502/project/MIML/src_mult_imp/00_svm_fnc.R")
 
 # Exploratory analysis:
-par(mfrow=c(2,2))
-missmap(anes, main = "Missing values vs observed, Full Data")
-missmap(amp.mar, main = "Missing values vs observed, MAR")
-missmap(amp.mcar, main = "Missing values vs observed, MCAR")
-missmap(amp.mnar, main = "Missing values vs observed, MNAR")
+#par(mfrow=c(2,2))
+#missmap(anes, main = "Missing values vs observed, Full Data")
+#missmap(amp.mar, main = "Missing values vs observed, MAR")
+#missmap(amp.mcar, main = "Missing values vs observed, MCAR")
+#missmap(amp.mnar, main = "Missing values vs observed, MNAR")
 
 # Listwise deletion for ``natural" missingness in anes
 dim(anes)
@@ -50,7 +50,9 @@ dim(anes) #deletes 1889 rows
 # return the 10 datasets, each missing a "fold")
 
 # First, I need to set up cross-validation, I will use the caret package method
-flds <- createFolds(amp.mar$vote.dem, k = 10, list = TRUE, returnTrain = FALSE)
+# You can't have any missing values here, so I use the full dataset to create the folds
+n_folds <- 10
+flds <- createFolds(anes$vote.dem, k = n_folds, list = TRUE, returnTrain = FALSE)
 #names(flds)[1] <- "train"
 
 #how to access the folds:
@@ -58,26 +60,60 @@ fold1 <- amp.mar[flds[[1]],]
 
 #SVM through the function found in David Roger's thesis
 #SVMI<- function(data,categ.vars,modlist,max.iter=100,min.tol=1e-4)
-data <- amp.mar
-
 #    categ.vars is a vector indicating the column numbers of the categorical variables
+amp.mar <- amp.mar[,-7] #bible variable is causing some problems in the SVM
 colnames(amp.mar)
-categ.vars <- c(1,2,3,4,7,8,9,10,11,12,13,14) #everything except "HRC.FT", "DJT.FT"
+categ.vars <- c(1,2,3,4,7,8,9,10,11,12,13) #everything except "HRC.FT", "DJT.FT"
+
+# convert these columns to categorical
+amp.mar[categ.vars] <- lapply(amp.mar[categ.vars], factor)
+sapply(amp.mar, class)
 
 #    modlist should be a list containing the prefitted SVM models for each of the categ.vars
 trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
-ind_train <- unlist(flds[-10])
-training <- amp.mar[ind_train,]
-svm_Linear <- train(V14 ~., data = training, method = "svmLinear",
-                    trControl=trctrl,
-                    preProcess = c("center", "scale"),
-                    tuneLength = 10)
+# Use this when we want to just use training sets for SVM
+# ind_train <- unlist(flds[-10])
+# training <- amp.mar[ind_train,]
 
-modlist <- "fill this in"
+# For now, I will use the full dataset for training
+training <- amp.mar
+#svm_Linear <- train(DJT.FT ~., data = training, method = "svmLinear",
+#                    trControl=trctrl,
+#                    preProcess = c("center", "scale"),
+#                    tuneLength = 10)
+
+#to store the full list of models
+modlist <- list()
+
+#for(j in 1:n_folds){
+  #when we want to do cross-validation
+  #ind_train <- unlist(flds[-10])
+  #training <- amp.mar[ind_train,]
+  for(i in 1:length(categ.vars)){
+    print(i)
+    #i <- 5
+    
+    #take out missingness in training data (response and categorical variables)
+    comp_train <- training[complete.cases(training),]
+    
+    #train svm on one categorical variable
+    #i <- 2
+    form <- paste(colnames(comp_train)[categ.vars[i]], "~ .")
+    form <- as.formula(form)
+    
+    svm_Linear <- train(form, data = comp_train, method = "svmLinear",
+                        trControl=trctrl,
+                        preProcess = c("center", "scale"),
+                        tuneLength = 10)
+    
+    #add svm model to the modlist 
+    modlist[[i]] <- svm_Linear
+  }
+#}
 
 #run the imputation
-out <- SVMI()
+out <- SVMI(amp.mar,categ.vars,modlist,max.iter=100,min.tol=1e-4)
 
 
 # I compare the imputed datasets against the original dataset (with no added missingness) 
