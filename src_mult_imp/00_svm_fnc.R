@@ -205,39 +205,46 @@ SVMI_all <- function(data,categ.vars,modlist,max.iter=100,min.tol=1e-4) {
   ###### an observation is missing and it is categorical
   oneinds<- which(apply(1*(is.na(data)),1,sum)==1)
   onemiss<- data[oneinds,]
-  newinds<- as.numeric(rownames(na.omit(onemiss[,-categ.vars])))
+  #newinds<- as.numeric(rownames(na.omit(onemiss[,-categ.vars])))
   
   #we do not need to do multivariate imputation for amp.mar
   plusone <- which(apply(1*(is.na(data)),1,sum) > 1)
   
   #FIXING A TYPO IN THE CODE, this should be a new subset of onemiss, not data
-  onemiss<- onemiss[which(rownames(onemiss) %in% newinds),]
+  #onemiss<- onemiss[which(rownames(onemiss) %in% newinds),]
   
-  nmiss<- apply(is.na(onemiss)[,categ.vars],2,sum)
+  nmiss<- apply(is.na(onemiss),2,sum)
   na_count <-sapply(onemiss, function(y) sum(length(which(is.na(y)))))
-  for(i in 1:length(categ.vars)){
+  for(i in 1:ncol(data)){
     #i <- 5
     print(i)
     if(nmiss[i]>0){
-      missvar<- onemiss[which(is.na(onemiss[,categ.vars[i]])),]
-      newdata=missvar[,-categ.vars[i]]
+      missvar <- onemiss[which(is.na(onemiss[,i])),]
+      newdata=missvar[,-i]
       
-      newdata$HRC.FT <- as.numeric(as.character(newdata$HRC.FT))
-      newdata$DJT.FT <- as.numeric(as.character(newdata$DJT.FT))
+      if(i != 5){
+        newdata$HRC.FT <- as.numeric(as.character(newdata$HRC.FT))
+      }
+      if(i != 6){
+        newdata$DJT.FT <- as.numeric(as.character(newdata$DJT.FT))
+      }
       
       #convert to numeric for fill in
-      data[,categ.vars[i]] <- as.numeric(as.character(data[,categ.vars[i]]))
+      data[,i] <- as.numeric(as.character(data[,i]))
       
-      data[which(rownames(data) %in% rownames(missvar)),categ.vars[i]] <- as.numeric(
-        as.character(predict(modlist[[i]], newdata=newdata)))
+      data[which(rownames(data) %in% rownames(missvar)),i] <- as.numeric(
+        as.character(predict(modlist.all[[i]], newdata=newdata)))
       
-      #convert back to factor after fill in
-      data[,categ.vars[i]] <- as.factor(data[,categ.vars[i]])
+      if(i %in% categ.vars){
+        #convert back to factor after fill in
+        data[,i] <- as.factor(data[,i])
+      }
     }
   }
   
   #No need for multivariate imputation in this case
   plusone <- which(apply(1*(is.na(data)),1,sum) > 1)
+  any0 <- which(apply(1*(is.na(data)),1,sum) == 1)
   
   # ########### Filling in the missing values with an initial guess
   # # Convert to numeric
