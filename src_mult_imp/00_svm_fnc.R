@@ -57,7 +57,6 @@ SVMI<- function(data,categ.vars,modlist,max.iter=100,min.tol=1e-4) {
       missvar<- onemiss[which(is.na(onemiss[,categ.vars[i]])),]
       data[as.numeric(rownames(missvar)),categ.vars[i]]<-
         as.numeric(as.character(predict(modlist[[i]],
-                                        38
                                         newdata=as.matrix(missvar[,-categ.vars[i]]))))
     }
   }
@@ -103,7 +102,6 @@ SVMI<- function(data,categ.vars,modlist,max.iter=100,min.tol=1e-4) {
     hat.mat0<- hat.fun(datmat=juntos)
     fillednew<- t(apply(cbind(as.numeric(rownames(dirty)),dirty),MARGIN=1,
                         FUN=replacefun,hat.mat=hat.mat0))
-    39
     juntosnew<- rbind(clean,fillednew)[order(as.numeric(rownames(rbind(clean,fillednew)))),]
     sds<- apply(juntos[,-categ.vars],2,sd)
     comp.cts<- t(t(juntos[,-categ.vars]-juntosnew[,-categ.vars])/sds)
