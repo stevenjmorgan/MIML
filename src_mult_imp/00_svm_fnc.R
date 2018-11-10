@@ -164,7 +164,7 @@ SVMI<- function(data,categ.vars,modlist,max.iter=100,min.tol=1e-4) {
 }
 
 
-SVMI_all <- function(data,categ.vars,modlist,max.iter=100,min.tol=1e-4) {
+SVMI_all <- function(data,categ.vars,modlist.all,max.iter=100,min.tol=1e-4) {
   #categ.vars is a vector indicating the column numbers of the categorical variables
   #modlist should be a list containing the prefitted SVM models for each of the categ.vars
   nomiss<- which(apply(1*(is.na(data)),2,sum)==0)
