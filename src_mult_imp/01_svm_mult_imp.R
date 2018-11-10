@@ -83,7 +83,7 @@ training <- amp.mar
 #                    preProcess = c("center", "scale"),
 #                    tuneLength = 10)
 
-#to store the full list of models
+#to store the full list of models for categorical
 modlist <- list()
 
 #for(j in 1:n_folds){
@@ -112,8 +112,38 @@ modlist <- list()
   }
 #}
 
+
+#to store the full list of all models (continuous and categorical)
+modlist.all <- list()
+
+#for(j in 1:n_folds){
+#when we want to do cross-validation
+#ind_train <- unlist(flds[-10])
+#training <- amp.mar[ind_train,]
+for(i in 1:ncol(amp.mar)){
+  print(i)
+  #i <- 5
+  
+  #take out missingness in training data (response and categorical variables)
+  comp_train <- training[complete.cases(training),]
+  
+  #train svm on one categorical variable
+  #i <- 2
+  form <- paste(colnames(comp_train)[i], "~ .")
+  form <- as.formula(form)
+  
+  svm_Linear <- train(form, data = comp_train, method = "svmLinear",
+                      trControl=trctrl,
+                      preProcess = c("center", "scale"),
+                      tuneLength = 10)
+  
+  #add svm model to the modlist 
+  modlist.all[[i]] <- svm_Linear
+}
+#}
+
 #run the imputation
-out <- SVMI(amp.mar,categ.vars,modlist,max.iter=100,min.tol=1e-4)
+out <- SVMI_all(amp.mar,categ.vars,modlist,max.iter=100,min.tol=1e-4)
 
 
 # I compare the imputed datasets against the original dataset (with no added missingness) 
