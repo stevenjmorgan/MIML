@@ -28,6 +28,9 @@ load("C:/Users/ckell/Desktop/Google Drive/01_Penn State/2018-2019/Fall 2018/soda
 #load("C:/Users/ckell/Desktop/Google Drive/01_Penn State/2018-2019/Fall 2018/soda_502/project/MIML/ANES/anesMCAR.RData")
 load("C:/Users/ckell/Desktop/Google Drive/01_Penn State/2018-2019/Fall 2018/soda_502/project/MIML/ANES/anesMissing.RData")
 
+# Load SVM function
+source("C:/Users/ckell/Desktop/Google Drive/01_Penn State/2018-2019/Fall 2018/soda_502/project/MIML/src_mult_imp/00_svm_fnc.R")
+
 # Exploratory analysis:
 par(mfrow=c(2,2))
 missmap(anes, main = "Missing values vs observed, Full Data")
@@ -53,8 +56,28 @@ flds <- createFolds(amp.mar$vote.dem, k = 10, list = TRUE, returnTrain = FALSE)
 #how to access the folds:
 fold1 <- amp.mar[flds[[1]],]
 
-#SVM
+#SVM through the function found in David Roger's thesis
+#SVMI<- function(data,categ.vars,modlist,max.iter=100,min.tol=1e-4)
+data <- amp.mar
 
+#    categ.vars is a vector indicating the column numbers of the categorical variables
+colnames(amp.mar)
+categ.vars <- c(1,2,3,4,7,8,9,10,11,12,13,14) #everything except "HRC.FT", "DJT.FT"
+
+#    modlist should be a list containing the prefitted SVM models for each of the categ.vars
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+ind_train <- unlist(flds[-10])
+training <- amp.mar[ind_train,]
+svm_Linear <- train(V14 ~., data = training, method = "svmLinear",
+                    trControl=trctrl,
+                    preProcess = c("center", "scale"),
+                    tuneLength = 10)
+
+modlist <- "fill this in"
+
+#run the imputation
+out <- SVMI()
 
 
 # I compare the imputed datasets against the original dataset (with no added missingness) 
