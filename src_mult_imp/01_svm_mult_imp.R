@@ -62,11 +62,15 @@ fold1 <- amp.mar[flds[[1]],]
 #SVMI<- function(data,categ.vars,modlist,max.iter=100,min.tol=1e-4)
 #    categ.vars is a vector indicating the column numbers of the categorical variables
 amp.mar <- amp.mar[,-7] #bible variable is causing some problems in the SVM
+amp.mnar <- amp.mnar[,-7] 
+amp.mcar <- amp.mcar[,-7] 
 colnames(amp.mar)
 categ.vars <- c(1,2,3,4,7,8,9,10,11,12,13) #everything except "HRC.FT", "DJT.FT"
 
 # convert these columns to categorical
 amp.mar[categ.vars] <- lapply(amp.mar[categ.vars], factor)
+amp.mnar[categ.vars] <- lapply(amp.mnar[categ.vars], factor)
+amp.mcar[categ.vars] <- lapply(amp.mcar[categ.vars], factor)
 sapply(amp.mar, class)
 
 #    modlist should be a list containing the prefitted SVM models for each of the categ.vars
@@ -77,44 +81,14 @@ trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 # training <- amp.mar[ind_train,]
 
 # For now, I will use the full dataset for training
-training <- amp.mar
-#svm_Linear <- train(DJT.FT ~., data = training, method = "svmLinear",
-#                    trControl=trctrl,
-#                    preProcess = c("center", "scale"),
-#                    tuneLength = 10)
-
-#to store the full list of models for categorical
-modlist <- list()
-
-#for(j in 1:n_folds){
-  #when we want to do cross-validation
-  #ind_train <- unlist(flds[-10])
-  #training <- amp.mar[ind_train,]
-  for(i in 1:length(categ.vars)){
-    print(i)
-    #i <- 5
-    
-    #take out missingness in training data (response and categorical variables)
-    comp_train <- training[complete.cases(training),]
-    
-    #train svm on one categorical variable
-    #i <- 2
-    form <- paste(colnames(comp_train)[categ.vars[i]], "~ .")
-    form <- as.formula(form)
-    
-    svm_Linear <- train(form, data = comp_train, method = "svmLinear",
-                        trControl=trctrl,
-                        preProcess = c("center", "scale"),
-                        tuneLength = 10)
-    
-    #add svm model to the modlist 
-    modlist[[i]] <- svm_Linear
-  }
-#}
-
+training.mar <- amp.mar
+training.mnar <- amp.mnar
+training.mcar <- amp.mcar
 
 #to store the full list of all models (continuous and categorical)
-modlist.all <- list()
+modlist.all.mar <- list()
+modlist.all.mnar <- list()
+modlist.all.mcar <- list()
 
 #for(j in 1:n_folds){
 #when we want to do cross-validation
@@ -125,7 +99,7 @@ for(i in 1:ncol(amp.mar)){
   #i <- 5
   
   #take out missingness in training data (response and categorical variables)
-  comp_train <- training[complete.cases(training),]
+  comp_train <- training.mar[complete.cases(training.mar),]
   
   #train svm on one categorical variable
   #i <- 2
@@ -138,12 +112,57 @@ for(i in 1:ncol(amp.mar)){
                       tuneLength = 10)
   
   #add svm model to the modlist 
-  modlist.all[[i]] <- svm_Linear
+  modlist.all.mar[[i]] <- svm_Linear
 }
 #}
 
+for(i in 1:ncol(amp.mnar)){
+  print(i)
+  #i <- 5
+  
+  #take out missingness in training data (response and categorical variables)
+  comp_train <- training.mnar[complete.cases(training.mnar),]
+  
+  #train svm on one categorical variable
+  #i <- 2
+  form <- paste(colnames(comp_train)[i], "~ .")
+  form <- as.formula(form)
+  
+  svm_Linear <- train(form, data = comp_train, method = "svmLinear",
+                      trControl=trctrl,
+                      preProcess = c("center", "scale"),
+                      tuneLength = 10)
+  
+  #add svm model to the modlist 
+  modlist.all.mnar[[i]] <- svm_Linear
+}
+
+
+for(i in 1:ncol(amp.mcar)){
+  print(i)
+  #i <- 5
+  
+  #take out missingness in training data (response and categorical variables)
+  comp_train <- training.mcar[complete.cases(training.mcar),]
+  
+  #train svm on one categorical variable
+  #i <- 2
+  form <- paste(colnames(comp_train)[i], "~ .")
+  form <- as.formula(form)
+  
+  svm_Linear <- train(form, data = comp_train, method = "svmLinear",
+                      trControl=trctrl,
+                      preProcess = c("center", "scale"),
+                      tuneLength = 10)
+  
+  #add svm model to the modlist 
+  modlist.all.mcar[[i]] <- svm_Linear
+}
+
 #run the imputation
-out <- SVMI_all(amp.mar,categ.vars,modlist,max.iter=100,min.tol=1e-4)
+out.mar <- SVMI_all(amp.mar,categ.vars,modlist.all.mar,max.iter=100,min.tol=1e-4)
+out.mnar <- SVMI_all(amp.mnar,categ.vars,modlist.all.mnar,max.iter=100,min.tol=1e-4)
+out.mcar <- SVMI_all(amp.mcar,categ.vars,modlist.all.mcar,max.iter=100,min.tol=1e-4)
 
 
 # I compare the imputed datasets against the original dataset (with no added missingness) 
@@ -161,16 +180,16 @@ out <- SVMI_all(amp.mar,categ.vars,modlist,max.iter=100,min.tol=1e-4)
 # Logit:
 logit_form <- as.formula(.~.)
 logit_full <- glm(logit_form, data = anes, family=binomial(link='logit'))
-logit_mar <- glm(logit_form, data = amp.mar, family=binomial(link='logit'))
-logit_mnar <- glm(logit_form, data = amp.mnar, family=binomial(link='logit'))
-logit_mcar <- glm(logit_form, data = amp.mcar, family=binomial(link='logit'))
+logit_mar <- glm(logit_form, data = out.mar, family=binomial(link='logit'))
+logit_mnar <- glm(logit_form, data = out.mnar, family=binomial(link='logit'))
+logit_mcar <- glm(logit_form, data = out.mcar, family=binomial(link='logit'))
 
 # OLS:
 ols_form <- as.formula(.~.)
 ols_full <- lm(ols_form, data = anes)
-ols_mar <- lm(ols_form, data = amp.mar)
-ols_mnar <- lm(ols_form, data = amp.mnar)
-ols_mcar <- lm(ols_form, data = amp.mcar)
+ols_mar <- lm(ols_form, data = out.mar)
+ols_mnar <- lm(ols_form, data = out.mnar)
+ols_mcar <- lm(ols_form, data = out.mcar)
 
 #First, I report the results: 
 ###
@@ -220,9 +239,9 @@ colnames(ols_mod_f) <- c("full", "mar", "mnar", "mcar")
 
 # I report the MAPE and MSE for the data. 
 act <- anes$vote.dem
-pred_mar <- amp.mar$vote.dem
-pred_mnar <- amp.mnar$vote.dem
-pred_mcar <- amp.mcar$vote.dem
+pred_mar <- out.mar$vote.dem
+pred_mnar <- out.mnar$vote.dem
+pred_mcar <- out.mcar$vote.dem
 
 #mse
 mse_mar <- mean((act-pred_mar)^2)
@@ -233,3 +252,43 @@ mse_mcar <- mean((act-pred_mcar)^2)
 mape_mar <- mean(abs((act-pred_mar)/act))
 mape_mnar <- mean(abs((act-pred_mnar)/act))
 mape_mcar <- mean(abs((act-pred_mcar)/act))
+
+
+
+###
+### Code for just categorical
+###
+
+#svm_Linear <- train(DJT.FT ~., data = training, method = "svmLinear",
+#                    trControl=trctrl,
+#                    preProcess = c("center", "scale"),
+#                    tuneLength = 10)
+
+# #to store the full list of models for categorical
+# modlist <- list()
+# 
+# #for(j in 1:n_folds){
+#   #when we want to do cross-validation
+#   #ind_train <- unlist(flds[-10])
+#   #training <- amp.mar[ind_train,]
+#   for(i in 1:length(categ.vars)){
+#     print(i)
+#     #i <- 5
+#     
+#     #take out missingness in training data (response and categorical variables)
+#     comp_train <- training[complete.cases(training),]
+#     
+#     #train svm on one categorical variable
+#     #i <- 2
+#     form <- paste(colnames(comp_train)[categ.vars[i]], "~ .")
+#     form <- as.formula(form)
+#     
+#     svm_Linear <- train(form, data = comp_train, method = "svmLinear",
+#                         trControl=trctrl,
+#                         preProcess = c("center", "scale"),
+#                         tuneLength = 10)
+#     
+#     #add svm model to the modlist 
+#     modlist[[i]] <- svm_Linear
+#   }
+# #}
