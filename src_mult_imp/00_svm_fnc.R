@@ -45,23 +45,51 @@ SVMI<- function(data,categ.vars,modlist,max.iter=100,min.tol=1e-4) {
     vec[misspot]<- hat.mat[[hatelem]][rownum,]
     return(vec)
   }
+  asNumeric <- function(x) as.numeric(as.character(x))
+  factorsNumeric <- function(d) modifyList(d, lapply(d[, sapply(d, is.factor)],   
+                                                     asNumeric))
+  
   ###### First We impute missing values where only one value on
   ###### an observation is missing and it is categorical
   oneinds<- which(apply(1*(is.na(data)),1,sum)==1)
   onemiss<- data[oneinds,]
   newinds<- as.numeric(rownames(na.omit(onemiss[,-categ.vars])))
-  onemiss<- data[newinds,]
+  
+  #FIXING A TYPO IN THE CODE, this should be a new subset of onemiss, not data
+  onemiss<- onemiss[which(rownames(onemiss) %in% newinds),]
+  
   nmiss<- apply(is.na(onemiss)[,categ.vars],2,sum)
+  na_count <-sapply(onemiss, function(y) sum(length(which(is.na(y)))))
   for(i in 1:length(categ.vars)){
+    #i <- 5
+    print(i)
     if(nmiss[i]>0){
       missvar<- onemiss[which(is.na(onemiss[,categ.vars[i]])),]
-      data[as.numeric(rownames(missvar)),categ.vars[i]]<-
-        as.numeric(as.character(predict(modlist[[i]],
-                                        newdata=as.matrix(missvar[,-categ.vars[i]]))))
+      newdata=missvar[,-categ.vars[i]]
+      
+      newdata$HRC.FT <- as.numeric(as.character(newdata$HRC.FT))
+      newdata$DJT.FT <- as.numeric(as.character(newdata$DJT.FT))
+      
+      #convert to numeric for fill in
+      data[,categ.vars[i]] <- as.numeric(as.character(data[,categ.vars[i]]))
+      
+      data[which(rownames(data) %in% rownames(missvar)),categ.vars[i]] <- as.numeric(
+        as.character(predict(modlist[[i]], newdata=newdata)))
+      
+      #convert back to factor after fill in
+      data[,categ.vars[i]] <- as.factor(data[,categ.vars[i]])
     }
   }
+  
   ########### Filling in the missing values with an initial guess
-  mu0<- apply(na.omit(data),2,mean)
+  # Convert to numeric
+  data <- factorsNumeric(data)
+  #data[,categ.vars] <- as.numeric(as.character(data[,categ.vars]))
+  mu0<- apply(na.omit(data),2,median)
+  
+  # Convert back to factor
+  data[categ.vars] <- lapply(data[categ.vars], factor)
+  
   mu0[categ.vars]<- apply(na.omit(data[,categ.vars]),2,moder)
   misscols<- apply(is.na(data),2,sum)
   misscols<- which(misscols>0)
