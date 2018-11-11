@@ -292,3 +292,8 @@ mape_mcar <- mean(abs((act-pred_mcar)/act))
 #     modlist[[i]] <- svm_Linear
 #   }
 # #}
+
+
+# Useful Links:
+# BYU Code: https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=4214&context=etd
+# SVM's using careg: http://dataaspirant.com/2017/01/19/support-vector-machine-classifier-implementation-r-caret-package/
