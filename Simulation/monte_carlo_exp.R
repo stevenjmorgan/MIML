@@ -60,8 +60,10 @@ for (i in 1:nrow(data)) {
   }
 }
 
+colnames(mcar1) <- c("Y", "X1", "X2", "X3" ,"X4")
+
 summary(complete.cases(mcar1)) #86.4%
-save(mcar1, file = 'mcar1_singledf.RData')
+save(mcar1, data, file = 'mcar1_singledf.RData')
 
 
 # Create second MCAR dataset -> 50.8% full observations
