@@ -61,6 +61,7 @@ for (i in 1:nrow(data)) {
 }
 
 summary(complete.cases(mcar1)) #86.4%
+save(mcar1, file = 'mcar1_singledf.RData')
 
 
 # Create second MCAR dataset -> 50.8% full observations
