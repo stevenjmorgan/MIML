@@ -4,6 +4,8 @@ rm(list=ls())
 #setwd("C:/Users/Steve/Dropbox/PSU2018-2019/Fall2018/SODA502/MLMI")
 setwd("C:/Users/sum410/Dropbox/PSU2018-2019/Fall2018/SODA502/MLMI")
 
+# Random forest: using NA's as separate category
+
 library(MASS)
 library(ggplot2)
 library(e1071)
