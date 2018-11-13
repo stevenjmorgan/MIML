@@ -29,4 +29,6 @@ Protocol
 * put the results of the regression models in the overleaf document so that we can compare among each other
 
 2) Simulated data:
-* impute for the 
+* create the complete dataset using the first 24 lines of code in monte_carlo_exp.R (dataframe name is 'data')
+* the simulated missing data is mcar1_singledf.RData
+* impute for the missing dataset and compare the imputed dataset to the complete dataset
