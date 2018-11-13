@@ -19,3 +19,14 @@ October 18
 
 6) Write literature side by side on each of the above topics  
     
+November 13
+
+Protocol
+
+1) ANES:
+* impute for the cleanedANES.RData, which only has the natural missingness
+* run the last two regression models according to the script of ANES_clean.R
+* put the results of the regression models in the overleaf document so that we can compare among each other
+
+2) Simulated data:
+* impute for the 
