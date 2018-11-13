@@ -17,6 +17,14 @@ rm(list = ls())
 library(Amelia)
 library(caret)
 
+### Checking number of NA's per row
+sum_nacount <- apply(amp.mar, 1, function(x) sum(is.na(x)))
+length(which(sum_nacount>1))
+sum_nacount2 <- apply(amp.mnar, 1, function(x) sum(is.na(x)))
+length(which(sum_nacount2>1))
+sum_nacount3 <- apply(amp.mcar, 1, function(x) sum(is.na(x)))
+length(which(sum_nacount3>1))
+
 ###
 ### Direct Imputation
 ###
