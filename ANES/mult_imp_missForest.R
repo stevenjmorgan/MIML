@@ -12,7 +12,7 @@ if (!require("missForest")) install.packages("missForest")
 load("cleanedANES.RData")
 load("anesMissing.RData")
 # specify variable type
-cols <- c("vote.dem", "dem", "gop", "bible", "inform", "edu", "income", "female", "black", "hisp", "white")
+cols <- c("vote.dem", "dem", "gop", "ideo", "bible", "inform", "edu", "income", "female", "black", "hisp", "white")
 # Use lapply() to coerce and replace the chosen columns to factors:
 anes[cols] <- lapply(anes[cols], factor)
 amp.mar[cols] <- lapply(amp.mar[cols], factor)
