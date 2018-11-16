@@ -214,8 +214,8 @@ colnames(logit_bind_coeff) <- c("full", "mar", "mnar", "mcar")
 
 #     Model fit
 logit_mod_f <- as.data.frame(c(logit_full$aic,
-                               logit_mar$aic
-                               logit_mnar$aic
+                               logit_mar$aic,
+                               logit_mnar$aic,
                                logit_mcar$aic))
 colnames(logit_mod_f) <- c("full", "mar", "mnar", "mcar")
 ###
@@ -232,8 +232,8 @@ colnames(ols_bind_coeff) <- c("full", "mar", "mnar", "mcar")
 
 #     Model fit
 ols_mod_f <- as.data.frame(c(ols_full$aic,
-                               ols_mar$aic
-                               ols_mnar$aic
+                               ols_mar$aic,
+                               ols_mnar$aic,
                                ols_mcar$aic))
 colnames(ols_mod_f) <- c("full", "mar", "mnar", "mcar")
 
