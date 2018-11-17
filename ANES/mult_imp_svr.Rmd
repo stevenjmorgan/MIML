@@ -1,0 +1,182 @@
+---
+title: "MIML_SVR"
+author: "Shipi Dhanorkar"
+date: "11/17/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Libraries:
+```{r}
+library(dplyr)
+library(e1071)
+```
+
+First, I will load the cleaned anes data and examine it.
+
+```{r anes}
+setwd("~/Box Sync/Fall 2018/SODA 502 Personal/MIML/ANES")
+load("cleanedANES.RData")
+
+
+rmse <- function(error){
+    sqrt(mean(error^2))
+}
+```
+
+Now, I will run steps of SVR as described in "An Imputation Method for Missing Traffic Data Based on FCM Optimized by PSO-SVR" published in Journal of Advanced Transportation
+
+Step 1. Select samples without any missing attribute values.
+
+Step 2. Set one of the condition attributes (input attribute), some of whose values are missing, as the decision attributes (output attribute), and on the contrary, set the decision attributes as the condition attributes.
+
+Step 3. SVR is used to predict the decision attribute values [33].
+
+```{r step1a, echo=FALSE}
+mcar.comp = anes[complete.cases(anes),]
+mcar.incomp = anes[!complete.cases(anes),]
+
+imputed = as.data.frame(matrix())
+```
+
+Step 1b: Use complete cases for DJT.FT
+```{r step1b, echo = FALSE}
+# Run SVR models for different combo's of X on complete cases to predict DJT.FT
+model.DJTFT.full <- svm(DJT.FT ~  dem +gop+ ideo + bible + 
+                            inform + edu + income +
+                            female + black + hisp, mcar.comp) # Full model -> uses all
+predictedY <- predict(model.DJTFT.full, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.dem <- svm(DJT.FT ~ dem, data=mcar.comp) 
+predictedY <- predict(model.DJTFT.dem, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.gop <- svm(DJT.FT ~ gop data=mcar.comp) 
+predictedY <- predict(model.DJTFT.gop, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.demgop <- svm(DJT.FT ~ dem + gop, data=mcar.comp) 
+predictedY <- predict(model.DJTFT.demgop, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.demgopbible <- svm(DJT.FT ~ dem + gop + bible, data=mcar.comp) 
+predictedY <- predict(model.DJTFT.demgopbible, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.dembible <- svm(DJT.FT ~ dem + bible, data=mcar.comp) 
+predictedY <- predict(model.DJTFT.dembible, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.gopbible <- svm(DJT.FT ~ gop + bible, data=mcar.comp) 
+predictedY <- predict(model.DJTFT.gopbible, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.demideo <- svm(DJT.FT ~ dem + ideo, data=mcar.comp) 
+predictedY <- predict(model.DJTFT.demideo, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.demgopideo <- svm(DJT.FT ~ gop + ideo, data=mcar.comp) 
+predictedY <- predict(model.DJTFT.gopideo, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.demgopideobib <- svm(DJT.FT ~ dem + gop + ideo + bible, mcar.comp) 
+predictedY <- predict(model.DJTFT.demgopideobib, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.demgopideobib <- svm(DJT.FT ~ dem + gop + 
+                                     ideo + bible + 
+                                     inform, mcar.comp) 
+predictedY <- predict(model.DJTFT.demgopideobib, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.inform <- svm(DJT.FT ~ inform, data=mcar.comp)
+predictedY <- predict(model.DJTFT.inform, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error)
+
+model.DJTFT.deminform <- svm(DJT.FT ~ dem + inform, data=mcar.comp)
+predictedY <- predict(model.DJTFT.deminform, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.gopinform <- svm(DJT.FT ~ gop + inform, data=mcar.comp)
+predictedY <- predict(model.DJTFT.gopinform, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error) 
+
+model.DJTFT.demgopinform <- svm(DJT.FT ~ dem + gop + inform, data=mcar.comp)
+predictedY <- predict(model.DJTFT.demgopinform, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error)
+
+model.DJTFT.demgopideoinform <- svm(DJT.FT ~ dem + gop + 
+                                            ideo + inform, data=mcar.comp)
+predictedY <- predict(model.DJTFT.demgopideoinform, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error)
+
+model.DJTFT.demgopbibinform <- svm(DJT.FT ~ dem + gop + 
+                                            bible + inform, data=mcar.comp)
+predictedY <- predict(model.DJTFT.demgopbibinform, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error)
+
+model.DJTFT.dembibinform <- svm(DJT.FT ~ dem + 
+                                            bible + inform, data=mcar.comp)
+predictedY <- predict(model.DJTFT.dembibinform, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error)
+
+model.DJTFT.gopbibinform <- svm(DJT.FT ~ gop + 
+                                            bible + inform, data=mcar.comp)
+predictedY <- predict(model.DJTFT.gopbibinform, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error)
+
+model.DJTFT.ideobibinform <- svm(DJT.FT ~ ideo + 
+                                            bible + inform, data=mcar.comp)
+predictedY <- predict(model.DJTFT.ideobibinform, mcar.comp)
+error <- mcar.comp$DJT.FT - predictedY
+rmse(error)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
