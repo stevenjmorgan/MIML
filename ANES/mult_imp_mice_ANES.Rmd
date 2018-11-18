@@ -1,0 +1,28 @@
+---
+title: "mult_imp_mice_ANES"
+author: "Xiaoran Sun"
+date: "2018/11/18"
+output: html_document
+---
+
+```{r}
+setwd("~/Desktop/paper/SODA501/project/github/MIML/ANES") #Xiaoran's working directory
+library(mice)
+load("cleanedANES.RData")
+names(anes)
+```
+
+```{r}
+#transfer type of binary & categorical data into factor (from numeric)
+for(i in c(1:4, 7:14)){
+  anes[,i]<-as.factor(anes[,i])
+}
+str(anes)
+```
+
+
+```{r}
+#imputation method for each variable
+impmethod<-c("logreg", "logreg", "logreg", "polr", "pmm", "pmm", "polr", "polr", "polr", "polr", "logreg", "logreg", "logreg", "logreg")
+tempData <- mice(anes,m=5,maxit=100,meth=impmethod,seed=500)
+```
