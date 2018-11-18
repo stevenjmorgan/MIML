@@ -27,6 +27,7 @@ str(anes)
 impmethod<-c("logreg", "logreg", "logreg", "polr", "pmm", "pmm", "polr", "polr", "polr", "polr", "logreg", "logreg", "logreg", "logreg")
 tempData <- mice(anes,m=5,maxit=100,meth=impmethod,seed=500)
 summary(tempData)
+save(tempData, file="tempData_imp_mice_anes.RData")
 ```
 
 Run regression models

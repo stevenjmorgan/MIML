@@ -1,0 +1,60 @@
+---
+title: "mice_sim"
+author: "Xiaoran Sun"
+date: "2018/11/18"
+output: html_document
+---
+```{r}
+setwd("~/Desktop/paper/SODA501/project/github/MIML/Simulation") #Xiaoran's working directory
+library(mice)
+```
+
+simulate complete data (using codes from 'monte_carlo_exp.R')
+```{r}
+library(MASS)
+seed <- 24519
+
+# Create covariance matrix
+S <- matrix(c(1.0, -0.12, -0.1, 0.5, 0.1,
+             -0.12, 1.0, 0.1, -0.6, 0.1,
+             -0.1, 0.1, 1.0, -0.5, 0.1,
+             0.5, -0.6, -0.5, 1.0, 0.1,
+             0.1, 0.1, 0.1, 0.1, 1.0), ncol = 5)
+colnames(S) <- c("Y", "X1", "X2", "X3" ,"X4")
+
+# Create a single dataset from multivariate normal dist. w/ 5 variables
+set.seed(seed)
+data <- mvrnorm(500, rep(0,5), S)
+colnames(data) <- c("Y", "X1", "X2", "X3" ,"X4")
+data<-data.frame(data)
+```
+
+read in missing data 'mcar1'
+```{r}
+load("~/Desktop/paper/SODA501/project/github/MIML/Simulation/mcar1_singledf.RData")
+names(mcar1)<- c("Y", "X1", "X2", "X3" ,"X4")
+```
+
+multiple imputation for mcar1
+```{r}
+sim_miceData <- mice(mcar1,m=5,maxit=100,meth="pmm",seed=500)
+summary(sim_miceData)
+save(sim_miceData, file="sim_miceData.RData")
+
+sim_miceData.implist <- lapply(seq(sim_miceData$m), function(im) complete(sim_miceData, im))
+```
+
+Compute RMSE for comparing imputed and simulated data
+```{r}
+library(Metrics)
+RMSE_result<-data.frame(matrix(NA, ncol=5, nrow=5))
+colnames(RMSE_result)<- c("Y", "X1", "X2", "X3" ,"X4")
+rownames(RMSE_result)<-c("imp1", "imp2", "imp3", "imp4", "imp5")
+for(i in 1:5){
+  simdata<-sim_miceData.implist[[i]]
+  for (j in 1:5){
+    RMSE_result[i,j]<-rmse(data[,j], simdata[,j])
+  }
+}
+colMeans(RMSE_result)
+```
