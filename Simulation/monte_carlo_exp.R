@@ -1,8 +1,8 @@
 # This code generates and runs Monte Carlo experiments on missing data
 
 rm(list=ls())
-#setwd("C:/Users/Steve/Dropbox/PSU2018-2019/Fall2018/SODA502/MLMI")
-setwd("C:/Users/sum410/Dropbox/PSU2018-2019/Fall2018/SODA502/MLMI")
+setwd("C:/Users/Steve/Dropbox/PSU2018-2019/Fall2018/SODA502/MLMI")
+#setwd("C:/Users/sum410/Dropbox/PSU2018-2019/Fall2018/SODA502/MLMI")
 
 
 library(MASS)
@@ -89,6 +89,7 @@ for (i in 1:nrow(data)) {
 }
 
 summary(complete.cases(mcar2)) #50.8%
+save(mcar2, data, file = 'mcar2_singledf.RData')
 
 
 ### Create lists of simulated data
@@ -182,6 +183,8 @@ for(elem in 1:100){
 }
 
 summary(complete.cases(mar1.list[[1]]))
+mar1 <- mar1.list[[1]]
+save(mar1, data, file = 'mar1_singledf.RData')
 
 
 # Generate 100 MAR2 datasets -> 50.6% of rows fully observed
@@ -212,6 +215,10 @@ for(elem in 1:100){
 }
 
 summary(complete.cases(mar2.list[[1]]))
+mar2 <- mar2.list[[1]]
+save(mar2, data, file = 'mar2_singledf.RData')
+
+
 
 
 save(mcar1.list, mcar2.list, mar1.list, mar2.list, simulated_multi, file = 'mcar_sets.RData')
