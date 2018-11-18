@@ -8,6 +8,7 @@ output: html_document
 ```{r}
 setwd("~/Desktop/paper/SODA501/project/github/MIML/ANES") #Xiaoran's working directory
 library(mice)
+library(xtable)
 load("cleanedANES.RData")
 names(anes)
 ```
@@ -25,4 +26,26 @@ str(anes)
 #imputation method for each variable
 impmethod<-c("logreg", "logreg", "logreg", "polr", "pmm", "pmm", "polr", "polr", "polr", "polr", "logreg", "logreg", "logreg", "logreg")
 tempData <- mice(anes,m=5,maxit=100,meth=impmethod,seed=500)
+summary(tempData)
+```
+
+Run regression models
+```{r}
+# Model vote choice w/o feeling thermometers (reduce collinearity w/ ideology)
+vote.dem.noFT <- with(tempData, glm(vote.dem ~ dem + gop + as.numeric(ideo) + as.numeric(bible) + as.numeric(inform) + as.numeric(edu) +  as.numeric(income) + female + black + hisp, family = 'binomial'))
+model1<-round(summary(pool(vote.dem.noFT)),4)
+mean(c(vote.dem.noFT$analyses[[1]]$deviance, vote.dem.noFT$analyses[[2]]$deviance, vote.dem.noFT$analyses[[3]]$deviance, vote.dem.noFT$analyses[[4]]$deviance, vote.dem.noFT$analyses[[5]]$deviance))
+```
+
+```{r}
+# Model feeling thermometer for Trump (0-100 treated as continuous)
+trump.FT <-with(tempData, lm(DJT.FT ~ dem + gop + as.numeric(ideo) + as.numeric(bible) + as.numeric(inform) + as.numeric(edu) +  as.numeric(income) + female + black + hisp))
+model2<-round(summary(pool(trump.FT)),4)
+pool.r.squared(trump.FT)
+pool.r.squared(trump.FT, adjusted=TRUE)
+```
+
+```{r}
+xtable(model1)
+xtable(model2)
 ```
