@@ -32,3 +32,4 @@ Protocol
 * create the complete dataset using the first 24 lines of code in monte_carlo_exp.R (dataframe name is 'data')
 * the simulated missing data is mcar1_singledf.RData
 * impute for the missing dataset and compare the imputed dataset to the complete dataset
+(Note by Xiaoran: For continuous variables, I think we can use RMSE, i.e., Root Mean Square Error to compare)
