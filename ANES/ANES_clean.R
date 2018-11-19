@@ -8,6 +8,7 @@ setwd("C:/Users/Steve/Documents/Github/MIML/ANES")
 library(data.table)
 library(car)
 library(dplyr)
+library(stargazer)
 
 anes <- fread('C:/Users/Steve/Dropbox/PSU2018-2019/Fall2018/SODA502/MLMI/anes_timeseries_2016_rawdata.txt')
 
@@ -72,17 +73,28 @@ vote.dem.logit <- glm(vote.dem ~ dem + gop + ideo + HRC.FT + DJT.FT + bible +
                       inform + edu + income + female + black + hisp, 
                       data = anes, family = 'binomial')
 summary(vote.dem.logit)
+stargazer(vote.dem.logit, single.row = FALSE, 
+          covariate.labels = c('Democrat', 'Republican', 'Ideology', 'Clinton FT',
+                               'Trump FT', 'Bible Inerrant', 'Pol. Informed', 'Education',
+                               'Income', 'Female', 'Black', 'Hispanic'))
 
 # Model vote choice w/o feeling thermometers (reduce collinearity w/ ideology)
 vote.dem.noFT <- glm(vote.dem ~ dem + gop + ideo + bible + inform + edu + 
                       income + female + black + hisp, data = anes, 
                       family = 'binomial')
 summary(vote.dem.noFT)
+stargazer(vote.dem.noFT, single.row = FALSE, 
+          covariate.labels = c('Democrat', 'Republican', 'Ideology', 
+                               'Bible Inerrant', 'Pol. Informed', 'Education',
+                               'Income', 'Female', 'Black', 'Hispanic'))
 
 
 # Model feeling thermometer for Trump (0-100 treated as continuous)
 trump.FT <- lm(DJT.FT ~ dem + gop + ideo + bible + inform + edu + edu + income +
               female + black + hisp, data = anes)
 summary(trump.FT)
+stargazer(trump.FT, single.row = FALSE, 
+          covariate.labels = c('Democrat', 'Republican', 'Ideology', 'Bible Inerrant', 'Pol. Informed', 'Education',
+                               'Income', 'Female', 'Black', 'Hispanic'))
 
 save(anes, file = 'cleanedANES.RData')
