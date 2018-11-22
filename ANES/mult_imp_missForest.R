@@ -1,9 +1,9 @@
 ## MIML_missForest
 ## Lulu Peng
 ## Created: 11/15/18
-## Last Updated: 11/15/18
+## Last Updated: 11/21/18
 
-# This script applies multiplie imputation w/ missForest to ANES cleaned data
+# This script applies multiple imputation w/ missForest to ANES data
 
 rm(list=ls())
 setwd("~/GitHub/MIML/ANES")
