@@ -26,10 +26,9 @@ Protocol
 1) ANES:
 * impute for the cleanedANES.RData, which only has the natural missingness
 * run the last two regression models according to the script of ANES_clean.R
-* put the results of the regression models in the overleaf document so that we can compare among each other
+* save the model output in the "ANES/model output" folder so that we can pull all the models together and use stargazer to generate a whole table (naming the saved model "imputation name_model name.RData", e.g., "mice_Trump.FT.RData")
 
 2) Simulated data:
 * create the complete dataset using the first 24 lines of code in monte_carlo_exp.R (dataframe name is 'data')
 * the simulated missing data is mcar1_singledf.RData
-* impute for the missing dataset and compare the imputed dataset to the complete dataset
-(Note by Xiaoran: For continuous variables, I think we can use RMSE, i.e., Root Mean Square Error to compare)
+* impute for the missing dataset and compare the imputed dataset to the complete dataset: use RMSE, i.e., Root Mean Square Error
