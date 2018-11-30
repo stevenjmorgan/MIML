@@ -193,9 +193,9 @@ length(which(is.na(out.mcar)))
 length(which(is.na(out.mnar)))
 
 #number of missing values to start
-length(which(is.na(out.mar)))
-length(which(is.na(out.mcar)))
-length(which(is.na(out.mnar)))
+length(which(is.na(amp.mar)))
+length(which(is.na(amp.mcar)))
+length(which(is.na(amp.mnar)))
 
 # I compare the imputed datasets against the original dataset (with no added missingness) 
 # to determine how well the algorithm recovers missing values. (This line might not be necessary)
@@ -212,7 +212,7 @@ length(which(is.na(out.mnar)))
 # Logit:
 # Model vote choice w/ feeling thermometers ##
 logit_form <- as.formula(vote.dem ~ dem + gop + ideo + HRC.FT + DJT.FT + bible + inform + edu + income + female + black + hisp)
-logit.FT_mF <- glm(logit_form, data = ANES.mF$ximp, family=binomial(link='logit'))
+#logit.FT_svm <- glm(logit_form, data = ANES.svm$ximp, family=binomial(link='logit'))
 # logit_full <- glm(logit_form, data = anes.complete, family=binomial(link='logit'))
 # logit_mar <- glm(logit_form, data = out.mar$ximp, family=binomial(link='logit'))
 # logit_mnar <- glm(logit_form, data = out.mnar$ximp, family=binomial(link='logit'))
@@ -220,26 +220,29 @@ logit.FT_mF <- glm(logit_form, data = ANES.mF$ximp, family=binomial(link='logit'
 
 ## Model vote choice w/o feeling thermometers (reduce collinearity w/ ideology) ##
 # vote.dem.noFT <- glm(vote.dem ~ dem + gop + ideo + bible + inform + edu + 
-#                          income + female + black + hisp, data = ANES.mF$ximp, family = 'binomial')
+#                          income + female + black + hisp, data = ANES.svm$ximp, family = 'binomial')
 # summary(vote.dem.noFT)
 logit_form <- as.formula(vote.dem ~ dem + gop + ideo + bible + inform + edu + 
                            income + female + black + hisp)
-logit.noFT_mF <- glm(logit_form, data = ANES.mF$ximp, family=binomial(link='logit'))
-logit_full <- glm(logit_form, data = anes.complete, family=binomial(link='logit'))
-logit_mar <- glm(logit_form, data = out.mar$ximp, family=binomial(link='logit'))
-logit_mnar <- glm(logit_form, data = out.mnar$ximp, family=binomial(link='logit'))
-logit_mcar <- glm(logit_form, data = out.mcar$ximp, family=binomial(link='logit'))
+#logit.noFT_svm <- glm(logit_form, data = ANES.svm$ximp, family=binomial(link='logit'))
+logit_full <- glm(logit_form, data = anes, family=binomial(link='logit'))
+logit_mar <- glm(logit_form, data = out.mar, family=binomial(link='logit'))
+logit_mnar <- glm(logit_form, data = out.mnar, family=binomial(link='logit'))
+logit_mcar <- glm(logit_form, data = out.mcar, family=binomial(link='logit'))
 
 # OLS:
 # Model feeling thermometer for Trump (0-100 treated as continuous)
 ols_form <- as.formula(DJT.FT ~ dem + gop + ideo + bible + inform + edu + edu + income + female + black + hisp)
-ols_mF <- lm(ols_form, data = ANES.mF$ximp)
-ols_full <- lm(ols_form, data = anes.complete)
-ols_mar <- lm(ols_form, data = out.mar$ximp)
-ols_mnar <- lm(ols_form, data = out.mnar$ximp)
-ols_mcar <- lm(ols_form, data = out.mcar$ximp)
+#ols_svm <- lm(ols_form, data = ANES.svm$ximp)
+ols_full <- lm(ols_form, data = anes)
+ols_mar <- lm(ols_form, data = out.mar)
+ols_mnar <- lm(ols_form, data = out.mnar)
+ols_mcar <- lm(ols_form, data = out.mcar)
 
-save(logit.FT_mF, logit.noFT_mF, ols_mF, file = "C:/Users/ckell/Desktop/Google Drive/01_Penn State/2018-2019/Fall 2018/soda_502/project/MIML/ANES/ANES_svm.RData")
+ols_list <- list(ols_full, ols_mar, ols_mnar, ols_mcar)
+logit_list <- list(logit_full, logit_mar, logit_mnar, logit_mcar)
+
+save(logit_list, ols_list, file = "C:/Users/ckell/Desktop/Google Drive/01_Penn State/2018-2019/Fall 2018/soda_502/project/MIML/ANES/model output/ANES_svm.RData")
 
 # # Logit:
 # logit_form <- as.formula(.~.)
