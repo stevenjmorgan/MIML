@@ -69,7 +69,7 @@ logit_full <- glm(logit_form, data = anes, family=binomial(link='logit'))
 
 # OLS:
 # Model feeling thermometer for Trump (0-100 treated as continuous)
-ols_form <- as.formula(DJT.FT ~ dem + gop + ideo + bible + inform + edu + edu + income + female + black + hisp)
+ols_form <- as.formula(DJT.FT ~ dem + gop + ideo + bible + inform + edu + income + female + black + hisp)
 #ols_svm <- lm(ols_form, data = ANES.svm$ximp)
 ols_knn <- lm(ols_form, data = anes.knn1)
 ols_full <- lm(ols_form, data = anes)
