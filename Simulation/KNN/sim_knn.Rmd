@@ -1,0 +1,93 @@
+---
+title: "Sim_knn"
+author: "So Young Park"
+---
+
+# Simulation data using KNN
+
+```{r}
+rm(list=ls())
+setwd("C:/Users/soyou/Box Sync/Classes/2018 Fall/SoDA 502")
+
+# KNN: using NA's as separate category
+
+library(MASS)
+library(e1071)
+library(VIM)
+library(Metrics)
+```
+
+simulate complete data (using codes from 'monte_carlo_exp.R')
+```{r}
+seed <- 24519
+# Create covariance matrix
+S <- matrix(c(1.0, -0.12, -0.1, 0.5, 0.1,
+             -0.12, 1.0, 0.1, -0.6, 0.1,
+             -0.1, 0.1, 1.0, -0.5, 0.1,
+             0.5, -0.6, -0.5, 1.0, 0.1,
+             0.1, 0.1, 0.1, 0.1, 1.0), ncol = 5)
+colnames(S) <- c("Y", "X1", "X2", "X3" ,"X4")
+# Create a single dataset from multivariate normal dist. w/ 5 variables
+set.seed(seed)
+data <- mvrnorm(500, rep(0,5), S)
+colnames(data) <- c("Y", "X1", "X2", "X3" ,"X4")
+data<-data.frame(data)
+```
+
+Multiple imputation for missing data 
+```{r}
+#reading in
+load("~/GitHub/MIML/Simulation/mcar1_singledf.RData")
+load("~/GitHub/MIML/Simulation/mcar2_singledf.RData")
+load("~/GitHub/MIML/Simulation/mar1_singledf.RData")
+load("~/GitHub/MIML/Simulation/mar2_singledf.RData")
+
+names <- c(mar1, mar2, mcar1, mcar2)
+names(mar1)<- c("Y", "X1", "X2", "X3" ,"X4")
+names(mar2)<- c("Y", "X1", "X2", "X3" ,"X4")
+names(mcar1)<- c("Y", "X1", "X2", "X3" ,"X4")
+names(mcar2)<- c("Y", "X1", "X2", "X3" ,"X4")
+
+names <- c("mar1", "mar2", "mcar1", "mcar2")
+for (x in names) {
+   i <- get(x)
+   names(i)<- c("A", "X1", "X2", "X3" ,"X4")
+}
+
+# create imputed outputs for "mar1", "mar2", "mcar1", "mcar2"
+sim_knn <- function(df){
+  out <- VIM::kNN(df, k = 5, weights = NULL, numFun = median, catFun = maxCat, impNA = TRUE, trace = TRUE, imp_var = TRUE, imp_suffix = "imp", addRandom = FALSE, useImputedDist = TRUE, weightDist = FALSE)
+  out <- out[1:5]
+  print(summary(out))
+  save(out, file = paste0(deparse(substitute(df)),"_sim_knn.RData"))
+}
+
+sim_knn(mar1)
+sim_knn(mar2)
+sim_knn(mcar1)
+sim_knn(mcar2)
+```
+
+```{r}
+#Compute RMSE for comparing imputed and simulated data
+RMSE_result<-data.frame(matrix(NA, ncol=5, nrow=1))
+colnames(RMSE_result)<- c("Y", "X1", "X2", "X3" ,"X4")
+rownames(RMSE_result)<-c("imp_knn")
+  
+rmse_knn <- function(df){
+  out <- VIM::kNN(df, k = 5, weights = NULL, numFun = median, catFun = maxCat, impNA = TRUE, trace = FALSE, imp_var = TRUE, imp_suffix = "imp", addRandom = FALSE, useImputedDist = TRUE, weightDist = FALSE)
+  out <- out[1:5]
+  for(i in 1:5){
+    RMSE_result[,i]<-Metrics::rmse(data[,i], out[,i])
+}
+  print(round(RMSE_result,4))
+  #print(rowSums(RMSE_result))
+}
+
+rmse_knn(mar1)
+rmse_knn(mar2)
+rmse_knn(mcar1)
+rmse_knn(mcar2)
+```
+
+```
