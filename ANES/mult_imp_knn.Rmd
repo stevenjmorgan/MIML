@@ -13,9 +13,7 @@ rm(list = ls())
 # Load packages
 library(dplyr)
 library(data.table)
-library(devtools)
 library(Amelia)
-library(stargazer)
 library(VIM)
 ```
 
