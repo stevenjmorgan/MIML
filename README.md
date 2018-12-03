@@ -10,7 +10,7 @@ October 18
 5) Explore Missing Imputation with traditional techniques and machine learning:
 
     MICE (Xiaoran)
-    ANN (So Young)
+    KNN (So Young)
     Amelia (Steve)
     SVR (Shipi)
     missForest(Lulu)
