@@ -1,7 +1,7 @@
 ## MIML_missForest
 ## Lulu Peng
 ## Created: 11/21/18
-## Last Updated: 11/21/18
+## Last Updated: 12/05/18
 
 # This script applies multiple imputation w/ missForest to simulated data
 
@@ -10,8 +10,8 @@ setwd("~/GitHub/MIML/Simulation")
 
 library(missForest)
 
-# function to calculate RMSE
-rmse <- function(miss.df, imp.df, true.df){
+# function to calculate miss errors
+miss.error <- function(miss.df, imp.df, true.df){
     # Create a matrix that notes NA values for each cell
     miss.mat <- matrix(NA, nrow = nrow(true.df), ncol = ncol(true.df))
     for (i in 1:nrow(miss.df)){
@@ -34,8 +34,7 @@ rmse <- function(miss.df, imp.df, true.df){
             }
         }
     }
-    rmse <- sqrt(mean(miss.error^2))
-    return(rmse)
+    return(miss.error)
 }
 
 # load datasets
@@ -45,17 +44,35 @@ load('mar1_singledf.RData')
 load('mar2_singledf.RData')
 
 lst <- list(mcar1, mcar2, mar1, mar2)
-lst <- lapply(lst, function(x) {colnames(x) <- c("Y", "X1", "X2", "X3" ,"X4"); as.data.frame(x)})
+varnames <- c("Y", "X1", "X2", "X3", "X4")
+lst <- lapply(lst, function(x) {colnames(x) <- varnames; as.data.frame(x)})
 
 imp <- list()
-rmse.mf <- c() # empty vector to store RMSE
+miss.error.mf <- list()
 for(i in 1:length(lst)) {
     set.seed(11212018)
     # the function itself gives out-of-bag NRMSE and true NRMSE
     imp[[i]] <- missForest(lst[[i]], xtrue = data) 
-    rmse.mf[i] <- rmse(lst[[i]], imp[[i]]$ximp, data)
+    miss.error.mf[[i]] <- miss.error(lst[[i]], imp[[i]]$ximp, data)
 }
 
-rmse.df <- t(as.data.frame(rmse.mf))
-colnames(rmse.df) <- c("mcar1", "mcar2", "mar1", "mar2")
+# rmse by variable
+rmse.var <- matrix(NA, 4, 5)
+colnames(rmse.var) <- varnames
+rownames(rmse.var) <- c("MCAR1", "MCAR2", "MAR1", "MAR2")
+for(i in 1:length(miss.error.mf)) {
+    miss <- miss.error.mf[[i]]
+    rmse.var[i,] <-
+        sapply(varnames, function(x) {
+        temp <- miss[which(names(miss)==x)]; 
+        return(sqrt(mean(temp^2)))
+        })
+}
+rmse.var <- round(rmse.var, 3)
+xtable(rmse.var, digits = 3)
+
+rmse.mf <- sapply(miss.error.mf, function(x) sqrt(mean(x^2)))
+
+rmse.df <- as.data.frame(rmse.mf)
+rownames(rmse.df) <- c("MCAR1", "MCAR2", "MAR1", "MAR2")
 # 0.9046120 0.8866511 0.9653924 1.0937433
