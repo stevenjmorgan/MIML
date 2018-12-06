@@ -36,6 +36,23 @@ Multiple imputation for missing data
 load("~/Desktop/paper/SODA501/project/github/MIML/Simulation/mcar1_singledf.RData")
 names(mcar1)<- c("Y", "X1", "X2", "X3" ,"X4")
 
+# Create a matrix that notes NA values for each cell
+miss.mat <- matrix(NA, nrow = nrow(mcar1), ncol = ncol(mcar1))
+for (i in 1:nrow(mcar1)){
+  for (j in 1:ncol(mcar1)){
+    if (is.na(mcar1[i,j])){
+      miss.mat[i,j] <- 0
+    }
+    else{
+      miss.mat[i,j] <- 1
+    }
+  }
+}
+
+colnames(miss.mat) <- c("Y", "X1", "X2", "X3" ,"X4")
+
+ 
+
 #multiple imputation
 sim_miceData_mcar1 <- mice(mcar1,m=5,maxit=100,meth="pmm",seed=500)
 summary(sim_miceData_mcar1)
@@ -43,25 +60,62 @@ save(sim_miceData_mcar1, file="sim_miceData_mcar1.RData")
 
 sim_miceData_mcar1.implist <- lapply(seq(sim_miceData_mcar1$m), function(im) complete(sim_miceData_mcar1, im))
 
+imp.df<-sim_miceData_mcar1.implist[[1]]
+
 #Compute RMSE for comparing imputed and simulated data
+#only retain data that was missing
+data.miss <- as.data.frame(matrix(NA, nrow = nrow(data), ncol = ncol(data)))
+for(i in 1:500){
+  for (j in 1:5){
+    if(is.na(mcar1[i,j])){
+      data.miss[i,j]<-data[i,j]
+    }
+  }
+}
+names(data.miss)<-c("Y", "X1", "X2", "X3" ,"X4")
+
 library(Metrics)
 RMSE_result<-data.frame(matrix(NA, ncol=5, nrow=5))
 colnames(RMSE_result)<- c("Y", "X1", "X2", "X3" ,"X4")
 rownames(RMSE_result)<-c("imp1", "imp2", "imp3", "imp4", "imp5")
-for(i in 1:5){
-  simdata<-sim_miceData_mcar1.implist[[i]]
-  for (j in 1:5){
-    RMSE_result[i,j]<-rmse(data[,j], simdata[,j])
+for(k in 1:5){
+  simdata<-sim_miceData_mcar1.implist[[k]]
+
+  for (h in 1:5){
+    RMSE_result[k,h]<-rmse(data.miss[!is.na(data.miss[,h]),h], simdata[!is.na(data.miss[,h]),h])
   }
 }
-round(colMeans(RMSE_result),4)
-```
+round(colMeans(RMSE_result),3)
 
+all_rmse<-rep(NA, 5)
+for(k in 1:5){
+  simdata<-sim_miceData_mcar1.implist[[k]]
+  all_rmse[k]<-rmse(data.miss[!is.na(data.miss)], simdata[!is.na(data.miss)])
+}
+round(mean(all_rmse),3)
+```
 2. 'mcar2'
 ```{r}
 #reading in
 load("~/Desktop/paper/SODA501/project/github/MIML/Simulation/mcar2_singledf.RData")
 names(mcar2)<- c("Y", "X1", "X2", "X3" ,"X4")
+
+# Create a matrix that notes NA values for each cell
+miss.mat <- matrix(NA, nrow = nrow(mcar2), ncol = ncol(mcar2))
+for (i in 1:nrow(mcar2)){
+  for (j in 1:ncol(mcar2)){
+    if (is.na(mcar2[i,j])){
+      miss.mat[i,j] <- 0
+    }
+    else{
+      miss.mat[i,j] <- 1
+    }
+  }
+}
+
+colnames(miss.mat) <- c("Y", "X1", "X2", "X3" ,"X4")
+
+ 
 
 #multiple imputation
 sim_miceData_mcar2 <- mice(mcar2,m=5,maxit=100,meth="pmm",seed=500)
@@ -70,25 +124,62 @@ save(sim_miceData_mcar2, file="sim_miceData_mcar2.RData")
 
 sim_miceData_mcar2.implist <- lapply(seq(sim_miceData_mcar2$m), function(im) complete(sim_miceData_mcar2, im))
 
+imp.df<-sim_miceData_mcar2.implist[[1]]
+
 #Compute RMSE for comparing imputed and simulated data
+#only retain data that was missing
+data.miss <- as.data.frame(matrix(NA, nrow = nrow(data), ncol = ncol(data)))
+for(i in 1:500){
+  for (j in 1:5){
+    if(is.na(mcar2[i,j])){
+      data.miss[i,j]<-data[i,j]
+    }
+  }
+}
+names(data.miss)<-c("Y", "X1", "X2", "X3" ,"X4")
+
 library(Metrics)
 RMSE_result<-data.frame(matrix(NA, ncol=5, nrow=5))
 colnames(RMSE_result)<- c("Y", "X1", "X2", "X3" ,"X4")
 rownames(RMSE_result)<-c("imp1", "imp2", "imp3", "imp4", "imp5")
-for(i in 1:5){
-  simdata<-sim_miceData_mcar2.implist[[i]]
-  for (j in 1:5){
-    RMSE_result[i,j]<-rmse(data[,j], simdata[,j])
+for(k in 1:5){
+  simdata<-sim_miceData_mcar2.implist[[k]]
+
+  for (h in 1:5){
+    RMSE_result[k,h]<-rmse(data.miss[!is.na(data.miss[,h]),h], simdata[!is.na(data.miss[,h]),h])
   }
 }
-round(colMeans(RMSE_result),4)
-```
+round(colMeans(RMSE_result),3)
 
+all_rmse<-rep(NA, 5)
+for(k in 1:5){
+  simdata<-sim_miceData_mcar2.implist[[k]]
+  all_rmse[k]<-rmse(data.miss[!is.na(data.miss)], simdata[!is.na(data.miss)])
+}
+round(mean(all_rmse),3)
+```
 3. 'mar1'
 ```{r}
 #reading in
 load("~/Desktop/paper/SODA501/project/github/MIML/Simulation/mar1_singledf.RData")
 names(mar1)<- c("Y", "X1", "X2", "X3" ,"X4")
+
+# Create a matrix that notes NA values for each cell
+miss.mat <- matrix(NA, nrow = nrow(mar1), ncol = ncol(mar1))
+for (i in 1:nrow(mar1)){
+  for (j in 1:ncol(mar1)){
+    if (is.na(mar1[i,j])){
+      miss.mat[i,j] <- 0
+    }
+    else{
+      miss.mat[i,j] <- 1
+    }
+  }
+}
+
+colnames(miss.mat) <- c("Y", "X1", "X2", "X3" ,"X4")
+
+ 
 
 #multiple imputation
 sim_miceData_mar1 <- mice(mar1,m=5,maxit=100,meth="pmm",seed=500)
@@ -97,25 +188,62 @@ save(sim_miceData_mar1, file="sim_miceData_mar1.RData")
 
 sim_miceData_mar1.implist <- lapply(seq(sim_miceData_mar1$m), function(im) complete(sim_miceData_mar1, im))
 
+imp.df<-sim_miceData_mar1.implist[[1]]
+
 #Compute RMSE for comparing imputed and simulated data
+#only retain data that was missing
+data.miss <- as.data.frame(matrix(NA, nrow = nrow(data), ncol = ncol(data)))
+for(i in 1:500){
+  for (j in 1:5){
+    if(is.na(mar1[i,j])){
+      data.miss[i,j]<-data[i,j]
+    }
+  }
+}
+names(data.miss)<-c("Y", "X1", "X2", "X3" ,"X4")
+
 library(Metrics)
 RMSE_result<-data.frame(matrix(NA, ncol=5, nrow=5))
 colnames(RMSE_result)<- c("Y", "X1", "X2", "X3" ,"X4")
 rownames(RMSE_result)<-c("imp1", "imp2", "imp3", "imp4", "imp5")
-for(i in 1:5){
-  simdata<-sim_miceData_mar1.implist[[i]]
-  for (j in 1:5){
-    RMSE_result[i,j]<-rmse(data[,j], simdata[,j])
+for(k in 1:5){
+  simdata<-sim_miceData_mar1.implist[[k]]
+
+  for (h in 1:5){
+    RMSE_result[k,h]<-rmse(data.miss[!is.na(data.miss[,h]),h], simdata[!is.na(data.miss[,h]),h])
   }
 }
-round(colMeans(RMSE_result),4)
-```
+round(colMeans(RMSE_result),3)
 
+all_rmse<-rep(NA, 5)
+for(k in 1:5){
+  simdata<-sim_miceData_mar1.implist[[k]]
+  all_rmse[k]<-rmse(data.miss[!is.na(data.miss)], simdata[!is.na(data.miss)])
+}
+round(mean(all_rmse),3)
+```
 4. 'mar2'
 ```{r}
 #reading in
 load("~/Desktop/paper/SODA501/project/github/MIML/Simulation/mar2_singledf.RData")
 names(mar2)<- c("Y", "X1", "X2", "X3" ,"X4")
+
+# Create a matrix that notes NA values for each cell
+miss.mat <- matrix(NA, nrow = nrow(mar2), ncol = ncol(mar2))
+for (i in 1:nrow(mar2)){
+  for (j in 1:ncol(mar2)){
+    if (is.na(mar2[i,j])){
+      miss.mat[i,j] <- 0
+    }
+    else{
+      miss.mat[i,j] <- 1
+    }
+  }
+}
+
+colnames(miss.mat) <- c("Y", "X1", "X2", "X3" ,"X4")
+
+ 
 
 #multiple imputation
 sim_miceData_mar2 <- mice(mar2,m=5,maxit=100,meth="pmm",seed=500)
@@ -124,16 +252,38 @@ save(sim_miceData_mar2, file="sim_miceData_mar2.RData")
 
 sim_miceData_mar2.implist <- lapply(seq(sim_miceData_mar2$m), function(im) complete(sim_miceData_mar2, im))
 
+imp.df<-sim_miceData_mar2.implist[[1]]
+
 #Compute RMSE for comparing imputed and simulated data
+#only retain data that was missing
+data.miss <- as.data.frame(matrix(NA, nrow = nrow(data), ncol = ncol(data)))
+for(i in 1:500){
+  for (j in 1:5){
+    if(is.na(mar2[i,j])){
+      data.miss[i,j]<-data[i,j]
+    }
+  }
+}
+names(data.miss)<-c("Y", "X1", "X2", "X3" ,"X4")
+
 library(Metrics)
 RMSE_result<-data.frame(matrix(NA, ncol=5, nrow=5))
 colnames(RMSE_result)<- c("Y", "X1", "X2", "X3" ,"X4")
 rownames(RMSE_result)<-c("imp1", "imp2", "imp3", "imp4", "imp5")
-for(i in 1:5){
-  simdata<-sim_miceData_mar2.implist[[i]]
-  for (j in 1:5){
-    RMSE_result[i,j]<-rmse(data[,j], simdata[,j])
+for(k in 1:5){
+  simdata<-sim_miceData_mar2.implist[[k]]
+
+  for (h in 1:5){
+    RMSE_result[k,h]<-rmse(data.miss[!is.na(data.miss[,h]),h], simdata[!is.na(data.miss[,h]),h])
   }
 }
-round(colMeans(RMSE_result),4)
+round(colMeans(RMSE_result),3)
+
+all_rmse<-rep(NA, 5)
+for(k in 1:5){
+  simdata<-sim_miceData_mar2.implist[[k]]
+  all_rmse[k]<-rmse(data.miss[!is.na(data.miss)], simdata[!is.na(data.miss)])
+}
+round(mean(all_rmse),3)
 ```
+
