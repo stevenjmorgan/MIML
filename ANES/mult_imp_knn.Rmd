@@ -83,5 +83,5 @@ ols_full <- lm(ols_form, data = anes)
 ols_list <- list(ols_knn, ols_full)
 logit_list <- list(logit_knn, logit_full)
 
-save(logit_list, ols_list, file = "C:/Users/soyou/Box Sync/Classes/2018 Fall/SoDA 502/ANES_knn.RData")
+save(logit_list, ols_list, file = "C:/Users/soyou/Box Sync/GitHub/MIML/ANES/model output/ANES_knn.RData")
 ```
