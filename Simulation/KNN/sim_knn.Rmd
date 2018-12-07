@@ -7,7 +7,7 @@ author: "So Young Park"
 
 ```{r}
 rm(list=ls())
-setwd("C:/Users/soyou/Box Sync/Classes/2018 Fall/SoDA 502")
+setwd("C:/Users/soyou/Box Sync/GitHub/MIML/Simulation")
 
 # KNN: using NA's as separate category
 
@@ -37,22 +37,16 @@ data<-data.frame(data)
 Multiple imputation for missing data 
 ```{r}
 #reading in
-load("~/GitHub/MIML/Simulation/mcar1_singledf.RData")
-load("~/GitHub/MIML/Simulation/mcar2_singledf.RData")
-load("~/GitHub/MIML/Simulation/mar1_singledf.RData")
-load("~/GitHub/MIML/Simulation/mar2_singledf.RData")
+load("C:/Users/soyou/Box Sync/GitHub/MIML/Simulation/mcar1_singledf.RData")
+load("C:/Users/soyou/Box Sync/GitHub/MIML/Simulation/mcar2_singledf.RData")
+load("C:/Users/soyou/Box Sync/GitHub/MIML/Simulation/mar1_singledf.RData")
+load("C:/Users/soyou/Box Sync/GitHub/MIML/Simulation/mar2_singledf.RData")
 
 names <- c(mar1, mar2, mcar1, mcar2)
 names(mar1)<- c("Y", "X1", "X2", "X3" ,"X4")
 names(mar2)<- c("Y", "X1", "X2", "X3" ,"X4")
 names(mcar1)<- c("Y", "X1", "X2", "X3" ,"X4")
 names(mcar2)<- c("Y", "X1", "X2", "X3" ,"X4")
-
-names <- c("mar1", "mar2", "mcar1", "mcar2")
-for (x in names) {
-   i <- get(x)
-   names(i)<- c("A", "X1", "X2", "X3" ,"X4")
-}
 
 # create imputed outputs for "mar1", "mar2", "mcar1", "mcar2"
 sim_knn <- function(df, knn){
@@ -66,17 +60,45 @@ sim_knn(mar1, 5)
 sim_knn(mar2, 5)
 sim_knn(mcar1, 5)
 sim_knn(mcar2, 5)
+
 ```
 
 ```{r}
-#Compute RMSE for comparing imputed and simulated data
-RMSE_result<-data.frame(matrix(NA, ncol=5, nrow=1))
-colnames(RMSE_result)<- c("Y", "X1", "X2", "X3" ,"X4")
-rownames(RMSE_result)<-c("imp_knn")
+#Compute RMSE for comparing imputed and simulated data only for the missing values.
+RMSE_result <- data.frame(matrix(NA, ncol = 5, nrow = 500))
+colnames(RMSE_result) <- c("Y", "X1", "X2", "X3" ,"X4")
+RMSE <- data.frame(matrix(NA, ncol = 5, nrow = 1))
+colnames(RMSE) <- c("Y", "X1", "X2", "X3" ,"X4")
+
+missM <- function(df){
+  out <- VIM::kNN(df, k = 5, weights = NULL, numFun = median, catFun = maxCat, impNA = TRUE, trace = FALSE, imp_var = TRUE, imp_suffix = "imp", addRandom = FALSE, useImputedDist = TRUE, weightDist = FALSE)
+
+for (j in 1:5){
+  for (i in 1:500)
+  if (out[i,j+5]=="TRUE"){
+    RMSE_result[i,j] <- rmse(data[i,j], out[i,j])
+  }
+}
   
+  RMSE$Y <- round(mean(RMSE_result[complete.cases(RMSE_result$Y),]$Y),3)
+  RMSE$X1 <- round(mean(RMSE_result[complete.cases(RMSE_result$X1),]$X1),3)
+  RMSE$X2 <- round(mean(RMSE_result[complete.cases(RMSE_result$X2),]$X2),3)
+  RMSE$X3 <- 0
+  RMSE$X4 <- round(mean(RMSE_result[complete.cases(RMSE_result$X4),]$X4),3)
+  
+  RMSE
+}
+
+round(rowMeans(missM(mar1)),3)
+round(rowMeans(missM(mar2)),3)
+round(rowMeans(missM(mcar1)),3)
+round(rowMeans(missM(mcar2)),3)
+```
+
+```{r}
 rmse_knn <- function(df, knn){
   out <- VIM::kNN(df, k = knn, weights = NULL, numFun = median, catFun = maxCat, impNA = TRUE, trace = FALSE, imp_var = TRUE, imp_suffix = "imp", addRandom = FALSE, useImputedDist = TRUE, weightDist = FALSE)
-  out <- out[1:5]
+  
   for(i in 1:5){
     RMSE_result[,i]<-Metrics::rmse(data[,i], out[,i])
 }
@@ -90,6 +112,5 @@ rmse_knn(mar1, 5)
 rmse_knn(mar2, 5)
 rmse_knn(mcar1, 5)
 rmse_knn(mcar2, 5)
-```
 
 ```
