@@ -19,7 +19,7 @@ library(VIM)
 
 ```{r load data}
 # Load ANES data.
-load("~/GitHub/MIML/ANES/cleanedANES.RData")
+load("C:/Users/soyou/Box Sync/GitHub/MIML/ANES/cleanedANES.RData")
 
 ### Check number of NA's per row
 sum_nacount <- apply(anes, 1, function(x) sum(is.na(x)))
@@ -50,12 +50,18 @@ anes.knn <- VIM::kNN(anes, k = 5, weights = NULL, numFun = median, catFun = maxC
 #anes.knn2 <- VIM::kNN(anes, k = 5, weights = NULL, numFun = median, catFun = maxCat, makeNA = NULL, NAcond = NULL, impNA = TRUE, donorcond = NULL, mixed = vector(), mixed.constant = NULL, trace = FALSE, imp_var = TRUE, imp_suffix = "imp", addRandom = FALSE, useImputedDist = TRUE, weightDist = FALSE) #mean
 
 #check to make sure there are no missing values
-length(which(is.na(anes.knn1)))
-length(which(is.na(anes.knn2)))
+length(which(is.na(anes.knn)))
 ```
 
 ```{r regression}
 # With the imputed dataset, I run two regressions:  logit and OLS.
+
+anes.knn <- anes.knn[1:14]
+#change categorical back to continuous
+
+# Use lapply() to coerce and replace the chosen columns to factors:
+anes.knn[cols2] <- lapply(anes.knn[cols2], as.numeric)
+anes[cols2] <- lapply(anes[cols2], as.numeric)
 
 # Logit:
 ## Model vote choice w/o feeling thermometers (reduce collinearity w/ ideology) ##
@@ -64,14 +70,14 @@ length(which(is.na(anes.knn2)))
 # summary(vote.dem.noFT)
 logit_form <- as.formula(vote.dem ~ dem + gop + ideo + bible + inform + edu + 
                            income + female + black + hisp)
-logit_knn <- glm(logit_form, data = anes.knn, family=binomial(link='logit'))
+
+logit_knn <- glm(logit_form, data = anes.knn, family="binomial")
 logit_full <- glm(logit_form, data = anes, family=binomial(link='logit'))
 
 # OLS:
 # Model feeling thermometer for Trump (0-100 treated as continuous)
 ols_form <- as.formula(DJT.FT ~ dem + gop + ideo + bible + inform + edu + income + female + black + hisp)
-#ols_svm <- lm(ols_form, data = ANES.svm$ximp)
-ols_knn <- lm(ols_form, data = anes.knn1)
+ols_knn <- lm(ols_form, data = anes.knn)
 ols_full <- lm(ols_form, data = anes)
 
 ols_list <- list(ols_knn, ols_full)
