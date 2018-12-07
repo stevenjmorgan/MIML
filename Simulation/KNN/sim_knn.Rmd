@@ -67,8 +67,8 @@ sim_knn(mcar2, 5)
 #Compute RMSE for comparing imputed and simulated data only for the missing values.
 RMSE_result <- data.frame(matrix(NA, ncol = 5, nrow = 500))
 colnames(RMSE_result) <- c("Y", "X1", "X2", "X3" ,"X4")
-RMSE <- data.frame(matrix(NA, ncol = 5, nrow = 1))
-colnames(RMSE) <- c("Y", "X1", "X2", "X3" ,"X4")
+RMSE <- data.frame(matrix(NA, ncol = 4, nrow = 1))
+colnames(RMSE) <- c("Y", "X1", "X2", "X4")
 
 missM <- function(df){
   out <- VIM::kNN(df, k = 5, weights = NULL, numFun = median, catFun = maxCat, impNA = TRUE, trace = FALSE, imp_var = TRUE, imp_suffix = "imp", addRandom = FALSE, useImputedDist = TRUE, weightDist = FALSE)
@@ -83,7 +83,6 @@ for (j in 1:5){
   RMSE$Y <- round(mean(RMSE_result[complete.cases(RMSE_result$Y),]$Y),3)
   RMSE$X1 <- round(mean(RMSE_result[complete.cases(RMSE_result$X1),]$X1),3)
   RMSE$X2 <- round(mean(RMSE_result[complete.cases(RMSE_result$X2),]$X2),3)
-  RMSE$X3 <- 0
   RMSE$X4 <- round(mean(RMSE_result[complete.cases(RMSE_result$X4),]$X4),3)
   
   RMSE
