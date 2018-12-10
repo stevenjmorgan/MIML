@@ -94,6 +94,11 @@ for (j in 1:5){
   RMSE
 }
 
+missM(mar1)
+missM(mar2)
+missM(mcar1)
+missM(mcar2)
+
 round(rowMeans(missM(mar1)),3)
 round(rowMeans(missM(mar2)),3)
 round(rowMeans(missM(mcar1)),3)
